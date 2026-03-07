@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "odgs-snowflake-bridge"
+version = "0.1.0"
+description = "Bridge: Snowflake Data Dictionary → ODGS Runtime Enforcement Schemas"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [{name = "Metric Provenance", email = "partner@metricprovenance.com"}]
+keywords = ["data-governance", "snowflake", "odgs", "eu-ai-act", "compliance", "bridge"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+dependencies = [
+    "odgs>=4.0.0",
+    "snowflake-connector-python>=3.0.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-mock>=3.10"]
+
+[project.urls]
+Homepage = "https://metricprovenance.com"
+Repository = "https://github.com/MetricProvenance/odgs-snowflake-bridge"
+Documentation = "https://github.com/MetricProvenance/odgs-snowflake-bridge#readme"
+
+[project.scripts]
+odgs-snowflake = "odgs_snowflake.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/odgs_snowflake"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
