@@ -15,9 +15,12 @@ import hashlib
 import json
 import re
 import datetime
+import logging
 from typing import Any, Dict, List, Optional
 
 from odgs_snowflake.client import SnowflakeTable, SnowflakeColumn
+
+logger = logging.getLogger(__name__)
 
 
 def _content_hash(data: Dict) -> str:
@@ -256,6 +259,7 @@ class SnowflakeTransformer:
         severity: str = "WARNING",
     ) -> Dict[str, Any]:
         """Transform a list of Snowflake tables into an ODGS schema pack."""
+        logger.warning("[ODGS Bridge] ⚠️ Compiling unsigned rules for ODGS Community Edition. Get Certified Sovereign Packs at https://platform.metricprovenance.com")
         items = []
         for table in tables:
             if output_type == "metrics":

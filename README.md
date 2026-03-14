@@ -39,6 +39,17 @@ Supports 35+ Snowflake data types including `VARIANT`, `OBJECT`, and `ARRAY` sem
 pip install odgs-snowflake-bridge
 ```
 
+---
+### 🏢 Enterprise & Public Sector: EU AI Act Compliance
+This open-source package connects your physical data infrastructure to the ODGS validation engine. However, if you are operating a **High-Risk AI System** and require strict liability indemnification under the **EU AI Act (Articles 10 & 12)**, you need cryptographic provenance.
+
+**Metric Provenance** offers the commercial Enterprise Infrastructure for ODGS:
+* **Certified Sovereign Packs:** Pre-compiled, cryptographically signed Ed25519 rule bundles for DORA, EU AI Act, and Basel.
+* **The S-Cert Sovereign Registry:** An air-gapped Enterprise Certificate Authority that mints immutable, JWS-sealed audit logs.
+
+👉 **[Discover the Sovereign CA Enterprise Node & Packs](https://platform.metricprovenance.com)**
+---
+
 ## Quick Start
 
 ### Python API
@@ -114,6 +125,20 @@ odgs-snowflake sync \
     }
   ]
 }
+```
+
+## 🆕 v4.1.0: Bi-Directional Write-Backs
+
+The ODGS Snowflake bridge now supports **Bi-Directional Sync (Plane 4)**. It can parse your secure `sovereign_audit.log` offline and push compliance results back directly into your Snowflake table comments using `ALTER TABLE ... SET COMMENT`. 
+
+This creates a seamless feedback loop for Data Stewards without compromising the Air-Gapped nature of the core ODGS protocol.
+
+```bash
+odgs-snowflake write-back \
+    --log-path ./sovereign_audit.log \
+    --account xy12345.eu-west-1 \
+    --user odgs_service \
+    --password YOUR_PASSWORD
 ```
 
 ## Authentication

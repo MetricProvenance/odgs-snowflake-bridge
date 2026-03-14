@@ -111,6 +111,13 @@ class SnowflakeClient:
         finally:
             cursor.close()
 
+    def update_table_comment(self, full_name: str, comment: str) -> None:
+        """Update the comment of a Snowflake table for ODGS write-backs."""
+        escaped_comment = comment.replace("'", "''")
+        query = f"ALTER TABLE {full_name} SET COMMENT = '{escaped_comment}'"
+        self._execute(query)
+        logger.debug(f"Updated comment for {full_name}")
+
     def list_databases(self) -> List[str]:
         """List all accessible databases."""
         rows = self._execute("SHOW DATABASES")
