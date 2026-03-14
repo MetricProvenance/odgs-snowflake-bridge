@@ -11,7 +11,7 @@
 
 ## What It Does
 
-The ODGS Snowflake Bridge connects to your Snowflake account, reads INFORMATION_SCHEMA metadata, and transforms table/column definitions into ODGS-compliant JSON schemas for the [Universal Interceptor](https://github.com/MetricProvenance/odgs-protocol).
+The ODGS Snowflake Bridge connects to your Snowflake account, reads INFORMATION_SCHEMA metadata, and transforms table/column definitions into ODGS-compliant JSON schemas for the [Universal Interceptor (ODGS Core Engine)](https://github.com/MetricProvenance/odgs-protocol).
 
 ```
 Snowflake INFORMATION_SCHEMA      ODGS
