@@ -141,7 +141,7 @@ class SnowflakeTransformer:
             },
             "provenance": {
                 "bridge": "odgs-snowflake-bridge",
-                "bridge_version": "0.2.0",
+                "bridge_version": "0.3.0",
                 "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "source_url": f"snowflake://{table.full_name}",
             },
@@ -189,9 +189,13 @@ class SnowflakeTransformer:
                     "target_column": col.name,
                     "target_table": table.full_name,
                     "source_authority": f"snowflake:{table.database_name}",
+                    # ODGS S-Cert legislative lineage fields (v5.1.0)
+                    "legislative_source": "BRIDGE_GENERATED_UNATTESTED",
+                    "semantic_hash": "UNATTESTED",
+                    "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.2.0",
+                        "bridge_version": "0.3.0",
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -214,9 +218,13 @@ class SnowflakeTransformer:
                     "target_column": col.name,
                     "target_table": table.full_name,
                     "source_authority": f"snowflake:{table.database_name}",
+                    # ODGS S-Cert legislative lineage fields (v5.1.0)
+                    "legislative_source": "BRIDGE_GENERATED_UNATTESTED",
+                    "semantic_hash": "UNATTESTED",
+                    "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.2.0",
+                        "bridge_version": "0.3.0",
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -238,9 +246,13 @@ class SnowflakeTransformer:
                     "target_column": col.name,
                     "target_table": table.full_name,
                     "source_authority": f"snowflake:{table.database_name}",
+                    # ODGS S-Cert legislative lineage fields (v5.1.0)
+                    "legislative_source": "BRIDGE_GENERATED_UNATTESTED",
+                    "semantic_hash": "UNATTESTED",
+                    "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.2.0",
+                        "bridge_version": "0.3.0",
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -273,7 +285,7 @@ class SnowflakeTransformer:
                 "source": "snowflake",
                 "organization": self.organization,
                 "bridge": "odgs-snowflake-bridge",
-                "bridge_version": "0.2.0",
+                "bridge_version": "0.3.0",
                 "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "tables_processed": len(tables),
                 "items_generated": len(items),
