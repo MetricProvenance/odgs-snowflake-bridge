@@ -141,8 +141,8 @@ class SnowflakeTransformer:
             },
             "provenance": {
                 "bridge": "odgs-snowflake-bridge",
-                "bridge_version": "0.1.0",
-                "synced_at": datetime.datetime.utcnow().isoformat() + "Z",
+                "bridge_version": "0.2.0",
+                "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "source_url": f"snowflake://{table.full_name}",
             },
         }
@@ -191,8 +191,8 @@ class SnowflakeTransformer:
                     "source_authority": f"snowflake:{table.database_name}",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.1.0",
-                        "synced_at": datetime.datetime.utcnow().isoformat() + "Z",
+                        "bridge_version": "0.2.0",
+                        "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
                 })
@@ -216,8 +216,8 @@ class SnowflakeTransformer:
                     "source_authority": f"snowflake:{table.database_name}",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.1.0",
-                        "synced_at": datetime.datetime.utcnow().isoformat() + "Z",
+                        "bridge_version": "0.2.0",
+                        "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
                 })
@@ -240,8 +240,8 @@ class SnowflakeTransformer:
                     "source_authority": f"snowflake:{table.database_name}",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.1.0",
-                        "synced_at": datetime.datetime.utcnow().isoformat() + "Z",
+                        "bridge_version": "0.2.0",
+                        "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
                 })
@@ -268,13 +268,13 @@ class SnowflakeTransformer:
                 items.extend(self.table_to_rules(table, severity=severity))
 
         schema = {
-            "$schema": "https://metricprovenance.com/schemas/odgs/v4",
+            "$schema": "https://metricprovenance.com/schemas/odgs/v5",
             "metadata": {
                 "source": "snowflake",
                 "organization": self.organization,
                 "bridge": "odgs-snowflake-bridge",
-                "bridge_version": "0.1.0",
-                "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
+                "bridge_version": "0.2.0",
+                "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "tables_processed": len(tables),
                 "items_generated": len(items),
             },

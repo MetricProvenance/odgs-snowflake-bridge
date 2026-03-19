@@ -144,7 +144,7 @@ class TestSchemaPackOutput:
         schema = transformer.transform_tables(
             [sample_table, view_table], output_type="metrics"
         )
-        assert schema["$schema"] == "https://metricprovenance.com/schemas/odgs/v4"
+        assert schema["$schema"] == "https://metricprovenance.com/schemas/odgs/v5"
         assert schema["metadata"]["source"] == "snowflake"
         assert schema["metadata"]["tables_processed"] == 2
         assert schema["metadata"]["items_generated"] == 2
