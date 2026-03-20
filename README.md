@@ -2,28 +2,51 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![ODGS](https://img.shields.io/badge/ODGS-v5.1.0-0055AA)](https://github.com/MetricProvenance/odgs-protocol)
+[![PyPI](https://img.shields.io/pypi/v/odgs-snowflake-bridge)](https://pypi.org/project/odgs-snowflake-bridge/)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://pypi.org/project/odgs-snowflake-bridge/)
 
 **Transform your Snowflake Data Dictionary into active ODGS runtime enforcement schemas.**
 
 > Snowflake stores your data. ODGS enforces the rules.
 
+The ODGS Snowflake Bridge is an **institutional connector** that reads Snowflake `INFORMATION_SCHEMA` metadata and transforms table and column definitions into cryptographically addressable ODGS enforcement schemas. Column constraints, nullability rules, and type assertions become mechanically executable governance rules enforced at pipeline runtime — with full audit trail support via the ODGS S-Cert Registry.
+
+Architecturally aligned with **CEN/CENELEC JTC 25** and **NEN 381 525** federated data sovereignty principles.
+
 ---
 
-## What It Does
+## Architecture
 
-The ODGS Snowflake Bridge connects to your Snowflake account, reads INFORMATION_SCHEMA metadata, and transforms table/column definitions into ODGS-compliant JSON schemas for the [Universal Interceptor (ODGS Core Engine)](https://github.com/MetricProvenance/odgs-protocol).
+```mermaid
+flowchart LR
+    subgraph SF["Snowflake"]
+        IS["INFORMATION_SCHEMA"]
+        TBL["Tables & Columns"]
+        CON["Constraints\n(NOT NULL, Types, VARCHAR lengths)"]
+    end
 
+    subgraph Bridge["odgs-snowflake-bridge"]
+        T["SnowflakeBridge\n.sync()"]
+        TR["Transformer\n→ ODGS Schema"]
+    end
+
+    subgraph ODGS["ODGS Protocol (odgs>=5.1.0)"]
+        I["Universal Interceptor\nHARD_STOP / WARNING / LOG_ONLY"]
+        WB["Write-Back\n→ Snowflake Table Comments"]
+    end
+
+    subgraph MP["Metric Provenance (Commercial)"]
+        SC["S-Cert Registry\n(JWS Audit Seal)"]
+    end
+
+    IS & TBL & CON --> T --> TR --> I
+    I -->|"sovereign_audit.log"| WB --> SF
+    I -->|"Certified S-Cert"| SC
 ```
-Snowflake INFORMATION_SCHEMA      ODGS
-┌──────────────┐     Bridge      ┌──────────────┐
-│ Databases    │ ──────────────→ │ JSON Schema  │
-│ Schemas      │   reads tables, │ + Interceptor│
-│ Tables       │   outputs ODGS  │ = Enforcement│
-│ Columns      │                 └──────────────┘
-└──────────────┘
-```
 
-### Three Rule Types Generated
+---
+
+## Three Rule Types Generated
 
 | Column Property | Rule Type | Example |
 |---|---|---|
@@ -33,21 +56,14 @@ Snowflake INFORMATION_SCHEMA      ODGS
 
 Supports 35+ Snowflake data types including `VARIANT`, `OBJECT`, and `ARRAY` semi-structured types.
 
+---
+
 ## Install
 
 ```bash
 pip install odgs-snowflake-bridge
 ```
 
----
-### 🏢 Enterprise & Public Sector: EU AI Act Compliance
-This open-source package connects your physical data infrastructure to the ODGS validation engine. However, if you are operating a **High-Risk AI System** and require strict liability indemnification under the **EU AI Act (Articles 10 & 12)**, you need cryptographic provenance.
-
-**Metric Provenance** offers the commercial Enterprise Infrastructure for ODGS:
-* **Certified Sovereign Packs:** Pre-compiled, cryptographically signed Ed25519 rule bundles for DORA, EU AI Act, and Basel.
-* **The S-Cert Sovereign Registry:** An air-gapped Enterprise Certificate Authority that mints immutable, JWS-sealed audit logs.
-
-👉 **[Discover the Sovereign CA Enterprise Node & Packs](https://platform.metricprovenance.com)**
 ---
 
 ## Quick Start
@@ -96,50 +112,54 @@ odgs-snowflake sync \
     --type rules \
     --severity HARD_STOP
 
-# SSO / Browser auth
+# SSO / Browser authentication
 odgs-snowflake sync \
     --account xy12345.eu-west-1 \
     --user user@company.com \
     --authenticator externalbrowser \
     --org acme_corp \
     --database PRODUCTION
-```
 
-### Output
-
-```json
-{
-  "$schema": "https://metricprovenance.com/schemas/odgs/v4",
-  "metadata": {
-    "source": "snowflake",
-    "tables_processed": 8,
-    "items_generated": 47
-  },
-  "items": [
-    {
-      "rule_urn": "urn:odgs:custom:acme_corp:rule:transactions_amount_not_null",
-      "severity": "HARD_STOP",
-      "constraint_type": "NOT_NULL",
-      "target_table": "PRODUCTION.FINANCE.TRANSACTIONS",
-      "content_hash": "a1b2c3..."
-    }
-  ]
-}
-```
-
-## 🆕 v4.1.0: Bi-Directional Write-Backs
-
-The ODGS Snowflake bridge now supports **Bi-Directional Sync (Plane 4)**. It can parse your secure `sovereign_audit.log` offline and push compliance results back directly into your Snowflake table comments using `ALTER TABLE ... SET COMMENT`. 
-
-This creates a seamless feedback loop for Data Stewards without compromising the Air-Gapped nature of the core ODGS protocol.
-
-```bash
+# Push compliance results back to Snowflake table comments
 odgs-snowflake write-back \
     --log-path ./sovereign_audit.log \
     --account xy12345.eu-west-1 \
     --user odgs_service \
     --password YOUR_PASSWORD
 ```
+
+### Output Schema
+
+```json
+{
+  "$schema": "https://metricprovenance.com/schemas/odgs/v5",
+  "metadata": {
+    "source": "snowflake",
+    "organization": "acme_corp",
+    "tables_processed": 8,
+    "items_generated": 47
+  },
+  "items": [
+    {
+      "rule_urn": "urn:odgs:custom:acme_corp:rule:transactions_amount_not_null",
+      "name": "TRANSACTIONS.AMOUNT NOT NULL",
+      "severity": "HARD_STOP",
+      "constraint_type": "NOT_NULL",
+      "target_table": "PRODUCTION.FINANCE.TRANSACTIONS",
+      "plain_english_description": "Transaction amount must be present in all financial records",
+      "content_hash": "a1b2c3..."
+    }
+  ]
+}
+```
+
+---
+
+## Bi-Directional Write-Backs
+
+The bridge supports **Bi-Directional Sync**: it parses your `sovereign_audit.log` offline and pushes compliance results back into Snowflake table comments using `ALTER TABLE ... SET COMMENT` — creating a seamless feedback loop for Data Stewards without compromising the air-gapped nature of the core ODGS protocol.
+
+---
 
 ## Authentication
 
@@ -149,16 +169,36 @@ odgs-snowflake write-back \
 | SSO / Browser | `--authenticator externalbrowser` | — |
 | Account | `--account` | `SNOWFLAKE_ACCOUNT` |
 
+---
+
+## Regulatory Alignment
+
+This bridge is designed for organisations governed by:
+
+| Regulation | Relevance |
+|---|---|
+| **DORA (Regulation EU 2022/2554)** | ICT operational resilience — data integrity and lineage traceability across Snowflake workloads |
+| **EU AI Act (2024/1689) Articles 10 & 12** | Training data governance and audit trail for High-Risk AI Systems using Snowflake as a data source |
+| **Basel Committee BCBS 239** | Risk data aggregation — accuracy and completeness of financial data stored in Snowflake |
+| **GDPR Article 5(2)** | Accountability principle — demonstrable, auditable data governance |
+
+> For cryptographic legal indemnity (Ed25519 JWS audit seals, certified Sovereign Packs for DORA/EU AI Act), see the **[Metric Provenance Enterprise Platform](https://platform.metricprovenance.com)**.
+
+---
+
 ## Requirements
 
 - Python ≥ 3.9
-- `odgs` ≥ 4.0.0 (core protocol)
+- `odgs` ≥ 5.1.0 (core protocol)
 - `snowflake-connector-python` ≥ 3.0.0
-- Snowflake account with INFORMATION_SCHEMA access
+- Snowflake account with `INFORMATION_SCHEMA` access
+
+---
 
 ## Related
 
 - [ODGS Protocol](https://github.com/MetricProvenance/odgs-protocol) — The core enforcement engine
+- [ODGS FLINT Bridge](https://github.com/MetricProvenance/odgs-flint-bridge) — TNO FLINT legal ontology connector
 - [ODGS Collibra Bridge](https://github.com/MetricProvenance/odgs-collibra-bridge) — Collibra integration
 - [ODGS Databricks Bridge](https://github.com/MetricProvenance/odgs-databricks-bridge) — Unity Catalog integration
 
