@@ -64,7 +64,7 @@ def sync(
         "metrics", "--type", help="Output type: 'metrics' or 'rules'",
     ),
     severity: str = typer.Option(
-        "WARNING", "--severity", help="Rule severity (HARD_STOP, WARNING, INFO)",
+        "WARNING", "--severity", help="Rule severity (HARD_STOP, SOFT_STOP, WARNING, INFO)",
     ),
     authenticator: str = typer.Option(
         "snowflake", "--authenticator", help="Auth method (snowflake, externalbrowser)",

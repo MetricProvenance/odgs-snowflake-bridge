@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "odgs-snowflake-bridge"
-version = "0.3.0"
+version = "0.4.0"
 description = "Bridge: Snowflake Data Dictionary → ODGS Runtime Enforcement Schemas"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -35,6 +35,10 @@ dev = ["pytest>=7.0", "pytest-mock>=3.10"]
 Homepage = "https://metricprovenance.com"
 Repository = "https://github.com/MetricProvenance/odgs-snowflake-bridge"
 Documentation = "https://github.com/MetricProvenance/odgs-snowflake-bridge#readme"
+Changelog = "https://github.com/MetricProvenance/odgs-snowflake-bridge/blob/main/CHANGELOG.md"
+Issues = "https://github.com/MetricProvenance/odgs-snowflake-bridge/issues"
+"Partner Demo" = "https://platform.metricprovenance.com"
+"ODGS Core" = "https://pypi.org/project/odgs/"
 
 [project.scripts]
 odgs-snowflake = "odgs_snowflake.cli:app"
