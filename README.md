@@ -157,7 +157,7 @@ odgs-snowflake write-back \
 
 ## Bi-Directional Write-Backs
 
-The bridge supports **Bi-Directional Sync**: it parses your `sovereign_audit.log` offline and pushes compliance results back into Snowflake table comments using `ALTER TABLE ... SET COMMENT` — creating a seamless feedback loop for Data Stewards without compromising the air-gapped nature of the core ODGS protocol.
+The bridge supports **Bi-Directional Sync**: it parses your `sovereign_audit.log` offline and pushes compliance results back into Snowflake table comments using `ALTER TABLE ... SET COMMENT` — creating a deterministic feedback loop for Data Stewards without compromising the air-gapped nature of the core ODGS protocol.
 
 ---
 
@@ -182,7 +182,7 @@ This bridge is designed for organisations governed by:
 | **Basel Committee BCBS 239** | Risk data aggregation — accuracy and completeness of financial data stored in Snowflake |
 | **GDPR Article 5(2)** | Accountability principle — demonstrable, auditable data governance |
 
-> For cryptographic legal indemnity (Ed25519 JWS audit seals, certified Sovereign Packs for DORA/EU AI Act), see the **[Metric Provenance Enterprise Platform](https://platform.metricprovenance.com)**.
+> For cryptographic legal indemnity (Ed25519 JWS audit seals, certified Sovereign Packs for DORA/EU AI Act), see the **[Metric Provenance Enterprise Platform](https://registry.metricprovenance.com)**.
 
 ---
 

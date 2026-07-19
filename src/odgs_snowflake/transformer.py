@@ -141,7 +141,7 @@ class SnowflakeTransformer:
             },
             "provenance": {
                 "bridge": "odgs-snowflake-bridge",
-                "bridge_version": "0.3.0",
+                "bridge_version": "0.4.1",
                 "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "source_url": f"snowflake://{table.full_name}",
             },
@@ -195,7 +195,7 @@ class SnowflakeTransformer:
                     "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.3.0",
+                        "bridge_version": "0.4.1",
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -224,7 +224,7 @@ class SnowflakeTransformer:
                     "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.3.0",
+                        "bridge_version": "0.4.1",
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -252,7 +252,7 @@ class SnowflakeTransformer:
                     "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.3.0",
+                        "bridge_version": "0.4.1",
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -271,7 +271,7 @@ class SnowflakeTransformer:
         severity: str = "WARNING",
     ) -> Dict[str, Any]:
         """Transform a list of Snowflake tables into an ODGS schema pack."""
-        logger.warning("[ODGS Bridge] ⚠️ Compiling unsigned rules for ODGS Community Edition. Get Certified Sovereign Packs at https://platform.metricprovenance.com")
+        logger.warning("[ODGS Bridge] ⚠️ Compiling unsigned rules for ODGS Community Edition. Get Certified Sovereign Packs at https://registry.metricprovenance.com")
         items = []
         for table in tables:
             if output_type == "metrics":
@@ -285,7 +285,7 @@ class SnowflakeTransformer:
                 "source": "snowflake",
                 "organization": self.organization,
                 "bridge": "odgs-snowflake-bridge",
-                "bridge_version": "0.3.0",
+                "bridge_version": "0.4.1",
                 "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "tables_processed": len(tables),
                 "items_generated": len(items),
