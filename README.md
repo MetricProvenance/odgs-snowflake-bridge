@@ -11,7 +11,7 @@
 
 The ODGS Snowflake Bridge is an **institutional connector** that reads Snowflake `INFORMATION_SCHEMA` metadata and transforms table and column definitions into cryptographically addressable ODGS enforcement schemas. Column constraints, nullability rules, and type assertions become mechanically executable governance rules enforced at pipeline runtime — with full audit trail support via the ODGS S-Cert Registry.
 
-Architecturally aligned with **CEN/CENELEC JTC 25** and **NEN 381 525** federated data sovereignty principles.
+Architecturally aligned with federated data sovereignty principles, and on a path toward standardization.
 
 ---
 

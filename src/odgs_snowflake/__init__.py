@@ -17,7 +17,7 @@ Usage:
     bridge.sync(database="PRODUCTION", output_dir="./schemas/custom/")
 """
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 from odgs_snowflake.bridge import SnowflakeBridge
 from odgs_snowflake.client import SnowflakeClient

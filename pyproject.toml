@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "odgs-snowflake-bridge"
-version = "0.4.1"
+version = "0.4.2"
 description = "Bridge: Snowflake Data Dictionary → ODGS Runtime Enforcement Schemas"
 readme = "README.md"
 requires-python = ">=3.9"
