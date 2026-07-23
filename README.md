@@ -37,7 +37,7 @@ flowchart LR
     end
 
     subgraph ODGS["ODGS Protocol (odgs>=5.1.0)"]
-        I["Universal Interceptor\nHARD_STOP / SOFT_STOP / WARNING / LOG_ONLY"]
+        I["Universal Interceptor\nHARD_STOP / SOFT_STOP / WARNING / INFO"]
         WB["Write-Back\n→ Snowflake Table Comments"]
     end
 
@@ -54,13 +54,15 @@ flowchart LR
 
 ## Three Rule Types Generated
 
-| Column Property | Rule Type | Example |
-|---|---|---|
-| `NOT NULL` constraint | `NOT_NULL` | `TXN_ID != None` |
-| Data type | `TYPE_CHECK` | `type(AMOUNT) == 'numeric'` |
-| `VARCHAR(N)` length | `MAX_LENGTH` | `len(CURRENCY) <= 3` |
+| Column Property | Rule Type | Example | Severity |
+|---|---|---|---|
+| `NOT NULL` constraint | `NOT_NULL` | `TXN_ID != None` | Your `--severity` flag |
+| Data type | `TYPE_CHECK` | `type(AMOUNT) == 'numeric'` | Always `INFO` |
+| `VARCHAR(N)` length | `MAX_LENGTH` | `len(CURRENCY) <= 3` | Your `--severity` flag |
 
-Supports 35+ Snowflake data types including `VARIANT`, `OBJECT`, and `ARRAY` semi-structured types.
+> **Note on `TYPE_CHECK` severity:** always `INFO` regardless of `--severity` — its `logic_expression` uses `type()`, which the ODGS engine's sandboxed evaluator doesn't allow, so it can't actually block a pipeline today (unlike `MAX_LENGTH`'s `len()`, which the engine does support). Binding `TYPE_CHECK` for real enforcement needs a custom evaluator extension.
+
+Supports 33+ Snowflake data types including `VARIANT`, `OBJECT`, and `ARRAY` semi-structured types.
 
 ---
 
@@ -136,24 +138,43 @@ odgs-snowflake write-back \
 
 ### Output Schema
 
+A real `table_to_rules()` output (`--type rules`):
+
 ```json
 {
   "$schema": "https://metricprovenance.com/schemas/odgs/v5",
   "metadata": {
     "source": "snowflake",
     "organization": "acme_corp",
+    "bridge": "odgs-snowflake-bridge",
+    "bridge_version": "0.4.3",
+    "generated_at": "2026-07-23T10:00:00+00:00",
     "tables_processed": 8,
     "items_generated": 47
   },
   "items": [
     {
+      "rule_id": "transactions_amount_not_null",
       "rule_urn": "urn:odgs:custom:acme_corp:rule:transactions_amount_not_null",
       "name": "TRANSACTIONS.AMOUNT NOT NULL",
+      "description": "Column AMOUNT must not be null",
+      "domain": "PRODUCTION.FINANCE",
       "severity": "HARD_STOP",
+      "logic_expression": "AMOUNT != None",
       "constraint_type": "NOT_NULL",
+      "target_column": "AMOUNT",
       "target_table": "PRODUCTION.FINANCE.TRANSACTIONS",
-      "plain_english_description": "Transaction amount must be present in all financial records",
-      "content_hash": "a1b2c3..."
+      "source_authority": "snowflake:PRODUCTION",
+      "legislative_source": "BRIDGE_GENERATED_UNATTESTED",
+      "semantic_hash": "UNATTESTED",
+      "verdict_on_pass": "PASS",
+      "content_hash": "a1b2c3...",
+      "provenance": {
+        "bridge": "odgs-snowflake-bridge",
+        "bridge_version": "0.4.3",
+        "synced_at": "2026-07-23T10:00:00+00:00",
+        "source_url": "snowflake://PRODUCTION.FINANCE.TRANSACTIONS/AMOUNT"
+      }
     }
   ]
 }

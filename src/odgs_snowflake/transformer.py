@@ -7,7 +7,7 @@ ODGS-compliant JSON schemas for runtime enforcement.
 
 Key difference from Databricks bridge:
 - Uses Snowflake-native data types (NUMBER, VARCHAR, VARIANT, etc.)
-- Captures Snowflake-specific metadata (row_count, bytes, clustering)
+- Captures Snowflake-specific metadata (row_count, bytes)
 - Supports VARIANT/OBJECT/ARRAY semi-structured type detection
 """
 
@@ -18,6 +18,7 @@ import datetime
 import logging
 from typing import Any, Dict, List, Optional
 
+from odgs_snowflake import __version__
 from odgs_snowflake.client import SnowflakeTable, SnowflakeColumn
 
 logger = logging.getLogger(__name__)
@@ -141,7 +142,7 @@ class SnowflakeTransformer:
             },
             "provenance": {
                 "bridge": "odgs-snowflake-bridge",
-                "bridge_version": "0.4.2",
+                "bridge_version": __version__,
                 "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "source_url": f"snowflake://{table.full_name}",
             },
@@ -195,7 +196,7 @@ class SnowflakeTransformer:
                     "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.4.2",
+                        "bridge_version": __version__,
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -211,6 +212,10 @@ class SnowflakeTransformer:
                     "name": f"{table.table_name}.{col.name} TYPE({col.data_type})",
                     "description": f"Column {col.name} must be {TYPE_CONSTRAINTS[type_upper]['type']}",
                     "domain": f"{table.database_name}.{table.schema_name}",
+                    # Always INFO regardless of --severity: this rule's logic_expression
+                    # uses type(), which the ODGS engine's sandboxed evaluator doesn't
+                    # allow (not in its safe-builtins list), so it can never actually
+                    # block a pipeline today. See README "Honest accounting" for detail.
                     "severity": "INFO",
                     "logic_expression": f"type({col.name}) == '{TYPE_CONSTRAINTS[type_upper]['type']}'",
                     "constraint_type": "TYPE_CHECK",
@@ -224,7 +229,7 @@ class SnowflakeTransformer:
                     "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.4.2",
+                        "bridge_version": __version__,
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -239,7 +244,10 @@ class SnowflakeTransformer:
                     "name": f"{table.table_name}.{col.name} MAX_LENGTH({col.character_maximum_length})",
                     "description": f"Column {col.name} must not exceed {col.character_maximum_length} characters",
                     "domain": f"{table.database_name}.{table.schema_name}",
-                    "severity": "WARNING",
+                    # Unlike TYPE_CHECK, len() IS in the engine's safe-functions
+                    # allowlist, so this rule can genuinely enforce — honor the
+                    # requested severity instead of hardcoding it.
+                    "severity": severity,
                     "logic_expression": f"len({col.name}) <= {col.character_maximum_length}",
                     "constraint_type": "MAX_LENGTH",
                     "max_length": col.character_maximum_length,
@@ -252,7 +260,7 @@ class SnowflakeTransformer:
                     "verdict_on_pass": "PASS",
                     "provenance": {
                         "bridge": "odgs-snowflake-bridge",
-                        "bridge_version": "0.4.2",
+                        "bridge_version": __version__,
                         "synced_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "source_url": f"snowflake://{table.full_name}/{col.name}",
                     },
@@ -271,6 +279,12 @@ class SnowflakeTransformer:
         severity: str = "WARNING",
     ) -> Dict[str, Any]:
         """Transform a list of Snowflake tables into an ODGS schema pack."""
+        if output_type not in ("metrics", "rules"):
+            raise ValueError(f"output_type must be 'metrics' or 'rules', got {output_type!r}")
+        valid_severities = {"HARD_STOP", "SOFT_STOP", "WARNING", "INFO"}
+        if severity not in valid_severities:
+            raise ValueError(f"severity must be one of {sorted(valid_severities)}, got {severity!r}")
+
         logger.warning("[ODGS Bridge] ⚠️ Compiling unsigned rules for ODGS Community Edition. Get Certified Sovereign Packs at https://registry.metricprovenance.com")
         items = []
         for table in tables:
@@ -285,7 +299,7 @@ class SnowflakeTransformer:
                 "source": "snowflake",
                 "organization": self.organization,
                 "bridge": "odgs-snowflake-bridge",
-                "bridge_version": "0.4.2",
+                "bridge_version": __version__,
                 "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "tables_processed": len(tables),
                 "items_generated": len(items),

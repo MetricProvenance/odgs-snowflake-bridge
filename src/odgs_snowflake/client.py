@@ -9,10 +9,32 @@ Reference: https://docs.snowflake.com/en/sql-reference/info-schema
 """
 
 import logging
+import re
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 
 logger = logging.getLogger("odgs_snowflake.client")
+
+# Unquoted Snowflake identifiers: letters, digits, underscore, $, not starting
+# with a digit. Dotted names (DB.SCHEMA.TABLE) are a sequence of these joined
+# by ".". This is intentionally conservative — real identifiers requiring
+# quoting (spaces, lowercase-preserved, reserved words) are rejected rather
+# than risk unsafe interpolation into SQL.
+_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_$]*$")
+
+
+def _validate_identifier(value: str, label: str = "identifier") -> str:
+    """Validate a (possibly dotted) SQL identifier before it's interpolated
+    into a query string. Snowflake's connector has no parameter-binding
+    mechanism for identifiers (only values), so this is the guard against
+    SQL injection via database/schema/table names — especially important on
+    the write-back path, where table names originate from a log file rather
+    than an operator-typed CLI flag.
+    """
+    parts = value.split(".")
+    if not parts or not all(_IDENTIFIER_RE.match(p) for p in parts):
+        raise ValueError(f"Invalid {label}: {value!r} is not a safe SQL identifier")
+    return value
 
 
 @dataclass
@@ -103,6 +125,7 @@ class SnowflakeClient:
         cursor = self._connection.cursor()
         try:
             if database:
+                _validate_identifier(database, "database name")
                 cursor.execute(f"USE DATABASE {database}")
 
             cursor.execute(query)
@@ -112,7 +135,13 @@ class SnowflakeClient:
             cursor.close()
 
     def update_table_comment(self, full_name: str, comment: str) -> None:
-        """Update the comment of a Snowflake table for ODGS write-backs."""
+        """Update the comment of a Snowflake table for ODGS write-backs.
+
+        full_name is validated before interpolation — on the write-back path
+        it originates from a sovereign_audit.log file, not an operator-typed
+        CLI flag, so it must be treated as untrusted input.
+        """
+        _validate_identifier(full_name, "table name")
         escaped_comment = comment.replace("'", "''")
         query = f"ALTER TABLE {full_name} SET COMMENT = '{escaped_comment}'"
         self._execute(query)
@@ -125,6 +154,7 @@ class SnowflakeClient:
 
     def list_schemas(self, database: str) -> List[str]:
         """List all schemas in a database (excluding INFORMATION_SCHEMA)."""
+        _validate_identifier(database, "database name")
         rows = self._execute(
             f"SELECT SCHEMA_NAME FROM {database}.INFORMATION_SCHEMA.SCHEMATA "
             f"WHERE SCHEMA_NAME != 'INFORMATION_SCHEMA' "
@@ -142,6 +172,8 @@ class SnowflakeClient:
 
         Uses INFORMATION_SCHEMA.TABLES and INFORMATION_SCHEMA.COLUMNS.
         """
+        _validate_identifier(database, "database name")
+        _validate_identifier(schema_name, "schema name")
         # Get tables
         table_rows = self._execute(
             f"SELECT TABLE_NAME, TABLE_TYPE, ROW_COUNT, BYTES, COMMENT, TABLE_OWNER "

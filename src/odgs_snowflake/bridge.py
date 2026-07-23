@@ -98,7 +98,11 @@ class SnowflakeBridge:
 
             os.makedirs(output_dir, exist_ok=True)
             db_id = database.replace(".", "_").lower()
-            filename = f"snowflake_{self.transformer.organization}_{db_id}_{output_type}.json"
+            # schema_filter must be part of the filename — otherwise syncing two
+            # schemas of the same database (e.g. FINANCE then SALES) silently
+            # overwrites the first output with the second.
+            schema_id = f"_{schema_filter.replace('.', '_').lower()}" if schema_filter else ""
+            filename = f"snowflake_{self.transformer.organization}_{db_id}{schema_id}_{output_type}.json"
             filepath = os.path.join(output_dir, filename)
 
             with open(filepath, "w", encoding="utf-8") as f:

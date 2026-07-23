@@ -164,17 +164,21 @@ def write_back(
     )
 
     processed_count = 0
+    skipped_count = 0
     try:
         with open(log_path, "r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip():
                     continue
-                
+
                 try:
                     json_str = line.split(" - ", 1)[1] if " - " in line else line
                     entry = json.loads(json_str)
+                    if not isinstance(entry, dict):
+                        raise ValueError(f"expected a JSON object, got {type(entry).__name__}")
                 except Exception as e:
-                    logging.debug(f"Skipping unparseable line: {e}")
+                    skipped_count += 1
+                    logging.info(f"Skipping unparseable audit-log line: {e}")
                     continue
 
                 metadata_map = entry.get("applied_metadata", {})
@@ -204,6 +208,8 @@ def write_back(
                     except Exception as e:
                         logging.error(f"Failed to write to Snowflake Table {table_name}: {e}")
 
+        if skipped_count:
+            typer.echo(f"⚠️  Skipped {skipped_count} unparseable audit-log line(s).")
         typer.echo(f"\n✅ Bi-Directional Sync Complete. Wrote {processed_count} logs to Snowflake.")
     finally:
         client.close()
