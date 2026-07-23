@@ -48,3 +48,12 @@ packages = ["src/odgs_snowflake"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src" = ""
+
+[tool.hatch.build.targets.sdist]
+# The marketplace-demo video/poster stay in the repo (GitHub README + marketplace listing
+# links need them) but are excluded from the published sdist — pure bloat for `pip install`.
+exclude = [
+    "examples/marketplace-demo/*.mp4",
+    "examples/marketplace-demo/*.jpg",
+    "examples/marketplace-demo/*.png",
+]

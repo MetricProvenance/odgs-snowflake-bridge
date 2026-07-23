@@ -13,6 +13,12 @@ The ODGS Snowflake Bridge is an **institutional connector** that reads Snowflake
 
 Architecturally aligned with federated data sovereignty principles, and on a path toward standardization.
 
+### See it in action
+
+[![Watch the Snowflake bridge sync a real schema and enforce a signed rule pack](examples/marketplace-demo/clip_snowflake_poster.jpg)](examples/marketplace-demo/clip_snowflake.mp4)
+
+Real bridge, real engine, real ES256-signed rule pack, real Ed25519 audit seal — click to watch on GitHub. Only the `snowflake.connector` DBAPI boundary is mocked (Snowflake has no REST surface); see [examples/marketplace-demo/](examples/marketplace-demo/) for the full honest-accounting demo rig.
+
 ---
 
 ## Architecture
